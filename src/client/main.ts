@@ -1900,9 +1900,10 @@ function renderAnnotationModeButton(): void {
 function renderCodexBridgeStatus(): void {
   const bridge = workbenchState?.codexBridge;
   const connected = Boolean(bridge?.connected);
+  const currentUnavailable = !connected && (bridge?.status === "bridge_unavailable" || bridge?.status === "expired" || (bridge?.bridgeUnavailableCount ?? 0) > 0);
   codexBridgeStatus.classList.toggle("connected", connected);
   codexBridgeStatus.classList.toggle("disconnected", !connected);
-  codexBridgeStatus.classList.toggle("unavailable", bridge?.status === "bridge_unavailable" || bridge?.status === "expired" || (bridge?.bridgeUnavailableCount ?? 0) > 0);
+  codexBridgeStatus.classList.toggle("unavailable", currentUnavailable);
   if (connected) {
     if (!bridge?.appServer.available) {
       codexBridgeStatus.textContent = "已注册会话，未发现 app-server";
