@@ -1,0 +1,143 @@
+schema: pptx-workbench.native-animation-catalog.v1
+purpose: "Workbench 播放预检与动画蒸馏的 PowerPoint 原生动画类型预留目录。"
+catalog:
+  entrance:
+    - effect: Fade
+      params: [duration, delay, startMode]
+      suitableFor: ["信息层揭示", "正文渐入", "状态变化"]
+      lite: true
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: low
+      fallback: "WPS-compatible 状态页 fade transition"
+    - effect: Fly In
+      params: [direction, duration, delay, startMode]
+      suitableFor: ["标题入场", "卡片入场"]
+      lite: true
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: medium
+      fallback: "fade 或状态页"
+    - effect: Wipe
+      params: [direction, duration, delay, startMode]
+      suitableFor: ["横线展开", "进度条揭示"]
+      lite: true
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: medium
+      fallback: "reveal clip-path 或状态页"
+    - effect: Zoom
+      params: [duration, delay, startMode]
+      suitableFor: ["主视觉出现", "重点数字"]
+      lite: true
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: medium
+      fallback: "fade"
+    - effect: Float In
+      params: [direction, duration, delay, startMode]
+      suitableFor: ["轻量装饰层", "低干扰入场"]
+      lite: false
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: high
+      fallback: "fly in 或 fade"
+  emphasis:
+    - effect: Grow/Shrink
+      params: [scale, duration, delay]
+      suitableFor: ["强调卡片", "重点对象"]
+      lite: true
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: medium
+      fallback: "scale emphasis CSS simulation"
+    - effect: Spin
+      params: [degrees, duration, delay]
+      suitableFor: ["图标强调"]
+      lite: false
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: high
+      fallback: "pulse 或无动画"
+    - effect: Pulse
+      params: [duration, delay]
+      suitableFor: ["风险提示", "当前状态"]
+      lite: true
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: medium
+      fallback: "color pulse 或 fade"
+  exit:
+    - effect: Fade
+      params: [duration, delay]
+      suitableFor: ["移除旧状态"]
+      lite: true
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: low
+      fallback: "状态页移除对象"
+    - effect: Fly Out
+      params: [direction, duration, delay]
+      suitableFor: ["对象退场"]
+      lite: false
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: high
+      fallback: "fade out"
+  motionPath:
+    - effect: Lines
+      params: [from, to, duration, delay]
+      suitableFor: ["流程移动", "指示箭头"]
+      lite: false
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: high
+      fallback: "简化 fly 或状态页"
+    - effect: Custom Path
+      params: [path, duration, delay]
+      suitableFor: ["高级演示动效"]
+      lite: false
+      pro: true
+      powerpoint: supported
+      keynote: low
+      wpsRisk: high
+      fallback: "状态页"
+  transition:
+    - effect: Fade
+      params: [duration]
+      suitableFor: ["WPS-compatible 状态页"]
+      lite: true
+      pro: true
+      powerpoint: supported
+      keynote: supported
+      wpsRisk: low
+      fallback: "none"
+    - effect: Push
+      params: [direction, duration]
+      suitableFor: ["章节切换"]
+      lite: true
+      pro: true
+      powerpoint: supported
+      keynote: partial
+      wpsRisk: medium
+      fallback: "fade"
+    - effect: Morph
+      params: [duration]
+      suitableFor: ["高保真对象连续变化"]
+      lite: false
+      pro: true
+      powerpoint: supported
+      keynote: low
+      wpsRisk: high
+      fallback: "状态页 + fade"

@@ -1,0 +1,815 @@
+version: "1"
+title: PPTX Workbench v1.6.11.1 同源预览验收工作台样例
+description: Codex-native 本地 PPTX 验收工作台中文多页样例：deck-spec 控制页面、图层、scene beat、Rich
+  单击动画簇、WPS 状态页降级、同源真实预览、内置播放 QA、动画时间轴、锁定导出、审计改稿建议、revision-plan.yaml 与 Codex
+  改稿提示词。
+slideSize: LAYOUT_WIDE
+outputs:
+  directory: outputs
+theme:
+  fonts:
+    heading: Aptos Display
+    body: Aptos
+  colors:
+    paper: "#F8FAFC"
+    ink: "#172033"
+    muted: "#64748B"
+    navy: "#0F1B33"
+    blue: "#3A6DFF"
+    cyan: "#5EEAD4"
+    orange: "#F97316"
+    green: "#22C55E"
+    red: "#EF4444"
+    accent: "#3A6DFF"
+slides:
+  - id: cover
+    title: 封面 / 承诺揭示
+    background: paper
+    layers:
+      - id: bg
+        role: background
+        elements:
+          - id: cover-bg
+            kind: shape
+            shape: rect
+            x: 0
+            y: 0
+            w: 13.333
+            h: 7.5
+            fill: paper
+          - id: cover-band
+            kind: shape
+            shape: rect
+            x: 0
+            y: 0
+            w: 13.333
+            h: 2.2
+            fill: navy
+      - id: decor
+        role: decor
+        elements:
+          - id: cover-orb
+            kind: shape
+            shape: ellipse
+            x: 9.6
+            y: 0.55
+            w: 2.25
+            h: 2.25
+            fill: blue
+            transparency: 12
+          - id: cover-line
+            kind: shape
+            shape: line
+            x: 1
+            y: 2.55
+            w: 10.8
+            h: 0
+            line:
+              color: cyan
+              width: 2
+      - id: hero
+        role: hero
+        elements:
+          - id: cover-hero-image
+            kind: image
+            src: assets/workbench-hero.svg
+            x: 8.1
+            y: 3.25
+            w: 3.9
+            h: 2.55
+          - id: cover-card
+            kind: shape
+            shape: roundRect
+            x: 0.82
+            y: 3.25
+            w: 4.15
+            h: 2.55
+            fill: navy
+      - id: text
+        role: text
+        elements:
+          - id: cover-eyebrow
+            kind: text
+            text: 本地 PPTX WORKBENCH · V1.6.11.1
+            x: 0.9
+            y: 0.72
+            w: 5.8
+            h: 0.36
+            fontSize: 13
+            bold: true
+            color: cyan
+          - id: cover-title
+            kind: text
+            text: 用 deck-spec 生成双版本 PPTX
+            x: 0.86
+            y: 1.1
+            w: 7.6
+            h: 0.9
+            fontFace: Aptos Display
+            fontSize: 34
+            bold: true
+            color: paper
+            fit: shrink
+          - id: cover-body
+            kind: text
+            text: YAML/JSON 描述 slide、layer、scene beat 与 animation cluster；本地生成
+              PowerPoint-rich 和 WPS-compatible 两个版本
+            x: 0.9
+            y: 3.58
+            w: 3.55
+            h: 1.18
+            fontSize: 16
+            color: paper
+            fit: shrink
+          - id: cover-footer
+            kind: text
+            text: 不做 MCP · 不依赖 PowerPoint 订阅 · 不走网页 UI 手点自动化
+            x: 0.9
+            y: 6.76
+            w: 8.6
+            h: 0.24
+            fontSize: 11
+            color: muted
+      - id: info
+        role: info_layer
+        elements:
+          - id: cover-callout
+            kind: text
+            hiddenUntilBeat: cover-beat
+            text: Scene beat：先揭示工作台承诺，再进入完整生成与兼容策略
+            x: 5.45
+            y: 3.45
+            w: 2.55
+            h: 1.18
+            fontSize: 14
+            color: ink
+            fit: shrink
+            codexNotes:
+              - "[2026-06-21T21:18:54.343Z] object/cover-callout: 删掉句号"
+              - "[2026-06-21T21:20:06.628Z] object/cover-callout: 删掉句号"
+          - id: cover-pill
+            kind: shape
+            hiddenUntilBeat: cover-beat
+            shape: roundRect
+            x: 5.24
+            y: 3.44
+            w: 0.14
+            h: 1.22
+            fill: orange
+    sceneBeats:
+      - id: cover-beat
+        label: 承诺揭示
+        description: 一次点击揭示工作台承诺，作为完整页面的 scene beat。
+        revealElements:
+          - cover-callout
+          - cover-pill
+  - id: section
+    title: 兼容策略
+    background: paper
+    layers:
+      - id: bg
+        role: background
+        elements:
+          - id: section-bg
+            kind: shape
+            shape: rect
+            x: 0
+            y: 0
+            w: 13.333
+            h: 7.5
+            fill: paper
+          - id: section-left
+            kind: shape
+            shape: rect
+            x: 0
+            y: 0
+            w: 3.25
+            h: 7.5
+            fill: navy
+      - id: decor
+        role: decor
+        elements:
+          - id: section-rule
+            kind: shape
+            shape: line
+            x: 3.72
+            y: 1.15
+            w: 7.8
+            h: 0
+            line:
+              color: blue
+              width: 2
+          - id: section-dot
+            kind: shape
+            shape: ellipse
+            x: 1.08
+            y: 5.65
+            w: 1
+            h: 1
+            fill: cyan
+            transparency: 10
+      - id: hero
+        role: hero
+        elements:
+          - id: section-number
+            kind: text
+            text: "01"
+            x: 0.86
+            y: 0.8
+            w: 1.4
+            h: 0.85
+            fontFace: Aptos Display
+            fontSize: 34
+            bold: true
+            color: cyan
+          - id: section-card
+            kind: shape
+            shape: roundRect
+            x: 4.05
+            y: 2.1
+            w: 6.8
+            h: 2.55
+            fill: navy
+            transparency: 4
+      - id: text
+        role: text
+        elements:
+          - id: section-title
+            kind: text
+            text: 双文件交付不是可选项
+            x: 3.75
+            y: 0.58
+            w: 7.6
+            h: 0.55
+            fontFace: Aptos Display
+            fontSize: 26
+            bold: true
+            color: ink
+          - id: section-body
+            kind: text
+            text: PowerPoint / Keynote 走 Rich 原生对象动画；WPS / 不确定环境走状态页降级。两个文件服务不同播放引擎。
+            x: 4.42
+            y: 2.74
+            w: 5.9
+            h: 0.95
+            fontSize: 18
+            color: paper
+            fit: shrink
+          - id: section-footer
+            kind: text
+            text: 兼容优先：稳定播放比堆满功能更重要。
+            x: 3.75
+            y: 6.55
+            w: 7.4
+            h: 0.28
+            fontSize: 12
+            color: muted
+      - id: info
+        role: info_layer
+        elements:
+          - id: section-callout
+            kind: text
+            hiddenUntilBeat: section-beat
+            text: Scene beat：明确 WPS 应使用状态页降级文件。
+            x: 4.28
+            y: 4.98
+            w: 4.8
+            h: 0.52
+            fontSize: 15
+            bold: true
+            color: ink
+            fit: shrink
+          - id: section-pill
+            kind: shape
+            hiddenUntilBeat: section-beat
+            shape: roundRect
+            x: 4.05
+            y: 4.95
+            w: 0.14
+            h: 0.62
+            fill: orange
+    sceneBeats:
+      - id: section-beat
+        label: 兼容规则
+        description: 一次点击揭示交付规则与橙色强调条。
+        revealElements:
+          - section-callout
+          - section-pill
+  - id: process
+    title: 生成流程
+    background: paper
+    layers:
+      - id: bg
+        role: background
+        elements:
+          - id: process-bg
+            kind: shape
+            shape: rect
+            x: 0
+            y: 0
+            w: 13.333
+            h: 7.5
+            fill: paper
+      - id: decor
+        role: decor
+        elements:
+          - id: process-top
+            kind: shape
+            shape: rect
+            x: 0
+            y: 0
+            w: 13.333
+            h: 0.25
+            fill: blue
+          - id: process-line
+            kind: shape
+            shape: line
+            x: 2
+            y: 3.55
+            w: 8.9
+            h: 0
+            line:
+              color: cyan
+              width: 2
+      - id: hero
+        role: hero
+        elements:
+          - id: process-step-1
+            kind: shape
+            shape: roundRect
+            x: 1
+            y: 2.25
+            w: 2.15
+            h: 1.5
+            fill: navy
+          - id: process-step-2
+            kind: shape
+            shape: roundRect
+            x: 3.85
+            y: 2.25
+            w: 2.15
+            h: 1.5
+            fill: navy
+          - id: process-step-3
+            kind: shape
+            shape: roundRect
+            x: 6.7
+            y: 2.25
+            w: 2.15
+            h: 1.5
+            fill: navy
+          - id: process-step-4
+            kind: shape
+            shape: roundRect
+            x: 9.55
+            y: 2.25
+            w: 2.15
+            h: 1.5
+            fill: navy
+      - id: text
+        role: text
+        elements:
+          - id: process-title
+            kind: text
+            text: Workbench 生成流程
+            x: 0.92
+            y: 0.72
+            w: 6.2
+            h: 0.55
+            fontFace: Aptos Display
+            fontSize: 28
+            bold: true
+            color: ink
+          - id: process-body
+            kind: text
+            text: deck-spec -> PptxGenJS render -> OOXML post-process -> package verify
+            x: 0.94
+            y: 1.35
+            w: 8.4
+            h: 0.38
+            fontSize: 15
+            color: muted
+          - id: process-t1
+            kind: text
+            text: Spec
+            x: 1.32
+            y: 2.76
+            w: 1.35
+            h: 0.34
+            fontSize: 18
+            bold: true
+            color: paper
+            align: center
+          - id: process-t2
+            kind: text
+            text: 渲染
+            x: 4.18
+            y: 2.76
+            w: 1.35
+            h: 0.34
+            fontSize: 18
+            bold: true
+            color: paper
+            align: center
+          - id: process-t3
+            kind: text
+            text: 动画
+            x: 7.02
+            y: 2.76
+            w: 1.35
+            h: 0.34
+            fontSize: 18
+            bold: true
+            color: paper
+            align: center
+          - id: process-t4
+            kind: text
+            text: 验证
+            x: 9.88
+            y: 2.76
+            w: 1.35
+            h: 0.34
+            fontSize: 18
+            bold: true
+            color: paper
+            align: center
+      - id: info
+        role: info_layer
+        elements:
+          - id: process-callout
+            kind: text
+            hiddenUntilBeat: process-beat
+            text: Scene beat：验证从文件存在检查升级为多页播放契约。
+            x: 3.15
+            y: 5.18
+            w: 5.7
+            h: 0.62
+            fontSize: 16
+            bold: true
+            color: ink
+            fit: shrink
+          - id: process-pill
+            kind: shape
+            hiddenUntilBeat: process-beat
+            shape: roundRect
+            x: 2.9
+            y: 5.12
+            w: 0.16
+            h: 0.78
+            fill: orange
+    sceneBeats:
+      - id: process-beat
+        label: 验证契约
+        description: 一次点击揭示验证范围：多页、动画簇、状态页降级都要过闸。
+        revealElements:
+          - process-callout
+          - process-pill
+  - id: comparison
+    title: Rich 与 WPS 对比
+    background: paper
+    layers:
+      - id: bg
+        role: background
+        elements:
+          - id: comparison-bg
+            kind: shape
+            shape: rect
+            x: 0
+            y: 0
+            w: 13.333
+            h: 7.5
+            fill: paper
+      - id: decor
+        role: decor
+        elements:
+          - id: comparison-divider
+            kind: shape
+            shape: line
+            x: 6.66
+            y: 1.45
+            w: 0
+            h: 4.65
+            line:
+              color: muted
+              width: 1
+              transparency: 35
+      - id: hero
+        role: hero
+        elements:
+          - id: comparison-rich-card
+            kind: shape
+            shape: roundRect
+            x: 0.9
+            y: 1.65
+            w: 5.25
+            h: 3.8
+            fill: navy
+          - id: comparison-wps-card
+            kind: shape
+            shape: roundRect
+            x: 7.18
+            y: 1.65
+            w: 5.25
+            h: 3.8
+            fill: navy
+            transparency: 7
+      - id: text
+        role: text
+        elements:
+          - id: comparison-title
+            kind: text
+            text: 两个输出，对应两套播放契约
+            x: 0.9
+            y: 0.62
+            w: 8.2
+            h: 0.56
+            fontFace: Aptos Display
+            fontSize: 27
+            bold: true
+            color: ink
+          - id: comparison-rich-title
+            kind: text
+            text: PowerPoint-rich
+            x: 1.28
+            y: 2.05
+            w: 3
+            h: 0.34
+            fontSize: 19
+            bold: true
+            color: cyan
+          - id: comparison-rich-body
+            kind: text
+            text: 原生对象动画：transition + timing + animEffect。推荐 PowerPoint 与 Keynote。
+            x: 1.28
+            y: 2.72
+            w: 4.25
+            h: 1.25
+            fontSize: 16
+            color: paper
+            fit: shrink
+          - id: comparison-wps-title
+            kind: text
+            text: WPS-compatible
+            x: 7.55
+            y: 2.05
+            w: 3
+            h: 0.34
+            fontSize: 19
+            bold: true
+            color: cyan
+          - id: comparison-wps-body
+            kind: text
+            text: 状态页展开：一个 beat 变成一个额外页面，并使用 fade transition。推荐 WPS。
+            x: 7.55
+            y: 2.72
+            w: 4.25
+            h: 1.25
+            fontSize: 16
+            color: paper
+            fit: shrink
+      - id: info
+        role: info_layer
+        elements:
+          - id: comparison-callout
+            kind: text
+            hiddenUntilBeat: comparison-beat
+            text: Scene beat：播放环境不确定时，默认交付 WPS-compatible。
+            x: 3.78
+            y: 6.18
+            w: 5.7
+            h: 0.45
+            fontSize: 15
+            bold: true
+            color: ink
+            align: center
+            fit: shrink
+          - id: comparison-pill
+            kind: shape
+            hiddenUntilBeat: comparison-beat
+            shape: roundRect
+            x: 3.25
+            y: 6.12
+            w: 0.2
+            h: 0.58
+            fill: orange
+    sceneBeats:
+      - id: comparison-beat
+        label: 默认交付
+        description: 一次点击揭示单文件交付时的默认推荐。
+        revealElements:
+          - comparison-callout
+          - comparison-pill
+  - id: closing
+    title: 交付建议
+    background: paper
+    layers:
+      - id: bg
+        role: background
+        elements:
+          - id: closing-bg
+            kind: shape
+            shape: rect
+            x: 0
+            y: 0
+            w: 13.333
+            h: 7.5
+            fill: navy
+      - id: decor
+        role: decor
+        elements:
+          - id: closing-orb
+            kind: shape
+            shape: ellipse
+            x: 9.4
+            y: 1.05
+            w: 2.8
+            h: 2.8
+            fill: blue
+            transparency: 18
+          - id: closing-rule
+            kind: shape
+            shape: line
+            x: 0.95
+            y: 5.75
+            w: 9.6
+            h: 0
+            line:
+              color: cyan
+              width: 2
+      - id: hero
+        role: hero
+        elements:
+          - id: closing-card
+            kind: shape
+            shape: roundRect
+            x: 0.9
+            y: 1.25
+            w: 6.8
+            h: 3.65
+            fill: paper
+      - id: text
+        role: text
+        elements:
+          - id: closing-eyebrow
+            kind: text
+            text: 交付规则
+            x: 1.25
+            y: 1.62
+            w: 3
+            h: 0.3
+            fontSize: 12
+            bold: true
+            color: blue
+          - id: closing-title
+            kind: text
+            text: 把正确文件交给正确软件
+            x: 1.25
+            y: 2.05
+            w: 5.45
+            h: 0.82
+            fontFace: Aptos Display
+            fontSize: 28
+            bold: true
+            color: ink
+            fit: shrink
+          - id: closing-body
+            kind: text
+            text: PowerPoint / Keynote 使用 Rich；WPS / 不确定环境 / 单文件外发使用 WPS-compatible。
+            x: 1.25
+            y: 3.12
+            w: 5.25
+            h: 0.88
+            fontSize: 17
+            color: muted
+            fit: shrink
+          - id: closing-footer
+            kind: text
+            text: v1.6.11.1 保留每页一次点击的 scene beat，并修复 Web 预览与 PPTX 导出的同源一致性。
+            x: 0.95
+            y: 6.18
+            w: 7.8
+            h: 0.32
+            fontSize: 12
+            color: cyan
+      - id: info
+        role: info_layer
+        elements:
+          - id: closing-callout
+            kind: text
+            hiddenUntilBeat: closing-beat
+            text: Scene beat：只能交付一个文件时，安全默认值是 WPS-compatible。
+            x: 8.45
+            y: 4.25
+            w: 3.25
+            h: 0.78
+            fontSize: 16
+            bold: true
+            color: paper
+            fit: shrink
+          - id: closing-pill
+            kind: shape
+            hiddenUntilBeat: closing-beat
+            shape: roundRect
+            x: 8.18
+            y: 4.22
+            w: 0.16
+            h: 0.88
+            fill: orange
+    sceneBeats:
+      - id: closing-beat
+        label: 安全默认
+        description: 一次点击揭示最终交付建议。
+        revealElements:
+          - closing-callout
+          - closing-pill
+animationClusters:
+  - id: cluster-cover-rich
+    target: powerpoint-rich
+    slideId: cover
+    beatId: cover-beat
+    strategy: reserved-object-timing
+    members:
+      - cover-callout
+      - cover-pill
+    notes: 一次点击揭示封面承诺说明和强调条。
+  - id: cluster-cover-wps
+    target: wps-compatible
+    slideId: cover
+    beatId: cover-beat
+    strategy: state-page
+    members:
+      - cover-callout
+      - cover-pill
+    notes: 展开为封面状态页。
+  - id: cluster-section-rich
+    target: powerpoint-rich
+    slideId: section
+    beatId: section-beat
+    strategy: reserved-object-timing
+    members:
+      - section-callout
+      - section-pill
+    notes: 一次点击揭示兼容规则。
+  - id: cluster-section-wps
+    target: wps-compatible
+    slideId: section
+    beatId: section-beat
+    strategy: state-page
+    members:
+      - section-callout
+      - section-pill
+    notes: 展开为兼容策略状态页。
+  - id: cluster-process-rich
+    target: powerpoint-rich
+    slideId: process
+    beatId: process-beat
+    strategy: reserved-object-timing
+    members:
+      - process-callout
+      - process-pill
+    notes: 一次点击揭示验证契约。
+  - id: cluster-process-wps
+    target: wps-compatible
+    slideId: process
+    beatId: process-beat
+    strategy: state-page
+    members:
+      - process-callout
+      - process-pill
+    notes: 展开为生成流程状态页。
+  - id: cluster-comparison-rich
+    target: powerpoint-rich
+    slideId: comparison
+    beatId: comparison-beat
+    strategy: reserved-object-timing
+    members:
+      - comparison-callout
+      - comparison-pill
+    notes: 一次点击揭示默认交付建议。
+  - id: cluster-comparison-wps
+    target: wps-compatible
+    slideId: comparison
+    beatId: comparison-beat
+    strategy: state-page
+    members:
+      - comparison-callout
+      - comparison-pill
+    notes: 展开为对比页状态页。
+  - id: cluster-closing-rich
+    target: powerpoint-rich
+    slideId: closing
+    beatId: closing-beat
+    strategy: reserved-object-timing
+    members:
+      - closing-callout
+      - closing-pill
+    notes: 一次点击揭示安全默认值。
+  - id: cluster-closing-wps
+    target: wps-compatible
+    slideId: closing
+    beatId: closing-beat
+    strategy: state-page
+    members:
+      - closing-callout
+      - closing-pill
+    notes: 展开为交付建议状态页。

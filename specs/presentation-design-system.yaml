@@ -1,0 +1,67 @@
+schema: pptx-workbench.presentation-design-system.v1
+name: PPTX Workbench v1.6.5 Design System Artifact
+purpose: Codex 改稿约束，不是用户手动配置中心。
+visualStyle:
+  direction: Light Glass Productivity Cockpit
+  principles:
+    - 中央 artifact preview 是绝对主角，默认显示干净 PPT 页面。
+    - 使用浅灰/深蓝灰混合生产力工作台质感，少量蓝/青/橙强调。
+    - 减少解释性长文，用状态 badge、timeline、风险标签和可执行按钮表达。
+typography:
+  heading:
+    role: 页面主标题
+    rule: 字重高、行高紧、避免被背景色块吞没。
+  body:
+    role: 正文说明
+    rule: 控制单行长度，优先 2-4 行可读文本。
+  label:
+    role: 眉标、状态、对象名
+    rule: 小字号高对比，不承担正文信息。
+spacing:
+  safeArea:
+    rule: 页面关键文本避开边缘和装饰图形，默认保留 7-10% 安全区。
+  rhythm:
+    rule: 标题、正文、callout、强调条之间保持清晰层级和节奏。
+colorTokens:
+  paper: "#F8FAFC"
+  ink: "#172033"
+  muted: "#64748B"
+  navy: "#0F1B33"
+  blue: "#3A6DFF"
+  cyan: "#5EEAD4"
+  orange: "#F97316"
+  success: "#22C55E"
+  warning: "#F97316"
+  danger: "#EF4444"
+layoutRules:
+  - 标题应在所属色块或页面区域内保持明确对齐，避免跨深浅背景导致可读性下降。
+  - 多行标题要做均衡换行，不要形成孤词。
+  - 卡片、框栏、callout 内文应垂直居中或视觉居中。
+  - 缩略图和中央画布必须同源渲染，不能退化为三条线占位图。
+motionRules:
+  - 每次点击对应一个 scene beat。
+  - 同一 scene beat 内的对象动画自动跑完，不要求连点或长按。
+  - withPrevious 子动画可以并行或轻微错峰，但必须属于同一点击簇。
+  - 网页播放 QA 是 deck-spec / scene beat 驱动，不等同于完整 PowerPoint 动画引擎。
+compatibilityRules:
+  powerpointRich:
+    file: PowerPoint-rich.pptx
+    targetApps:
+      - Microsoft PowerPoint
+      - Apple Keynote
+    rule: 可使用原生对象动画和 clickEffect cluster。
+  wpsCompatible:
+    file: WPS-compatible.pptx
+    targetApps:
+      - WPS
+      - uncertain playback environment
+      - external stable delivery
+    rule: 使用状态页展开 + fade transition，不依赖复杂对象 timing。
+  singleFileDefault: WPS-compatible.pptx
+antiPatterns:
+  - 调试线、安全框、状态标签污染默认 PPT 页面。
+  - 左侧缩略图使用占位线条，无法判断真实构图。
+  - 动画点击后没有可见变化。
+  - 同一 scene beat 需要连点或长按。
+  - 底部区域大面积空白，却挤压 QA 记录。
+  - 把 WPS-compatible 的状态页映射混成 Rich 对象动画。

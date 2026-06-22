@@ -1,0 +1,11 @@
+schema: pptx-workbench.reference-style.v1
+status: reserved
+purpose: "上传成品 PPT 后蒸馏视觉系统、内容结构和可复用规则的输出入口。"
+sections:
+  - contentStructure
+  - visualSystem
+  - pageTypes
+  - layoutRules
+  - motionLogic
+  - reusableAssets
+  - reusableRules

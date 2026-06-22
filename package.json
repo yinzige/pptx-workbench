@@ -1,0 +1,30 @@
+{
+  "name": "pptx-workbench",
+  "version": "1.6.11.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "codex-bridge": "tsx scripts/codex-thread-bridge.ts",
+    "bridge:register-current": "tsx scripts/register-current-thread.ts",
+    "bridge:create-token": "tsx scripts/create-bridge-token.ts",
+    "bridge:probe-app-server": "tsx scripts/probe-codex-app-server.ts",
+    "generate": "tsx scripts/generate.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build",
+    "verify": "npm run typecheck && npm run build && npm run generate && tsx scripts/verify-outputs.ts"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "jszip": "^3.10.1",
+    "pptxgenjs": "^4.0.1",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7"
+  }
+}
