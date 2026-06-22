@@ -156,6 +156,7 @@ interface WorkbenchStateResponse {
     codexBridgeEvents?: string;
     codexBridgeConfig?: string;
     codexBridgePendingTokens?: string;
+    codexBridgeReceipts?: string;
   };
   export: {
     lockedRoot: string;
@@ -489,6 +490,7 @@ interface CodexBridgeEvent {
 interface CodexBridgeSummary {
   configPath: string;
   eventsPath: string;
+  receiptsPath: string;
   pendingTokensPath: string;
   connected: boolean;
   status: "connected" | "missing_thread_id" | "bridge_unavailable" | "expired" | "not_configured" | "token_invalid" | "token_expired";
@@ -511,6 +513,22 @@ interface CodexBridgeSummary {
   latestEvent: CodexBridgeEvent | null;
 }
 
+interface CodexBridgeDispatchResult {
+  status: "idle" | "waiting_codex" | "partial" | "app_server_unavailable" | "bridge_unavailable";
+  threadId: string | null;
+  processed: number;
+  failed: number;
+  queued: number;
+  probeReport?: string;
+  message: string;
+  events: Array<{
+    id: string;
+    type: string;
+    status: string;
+    error?: string;
+  }>;
+}
+
 interface CodexQueueProcessResponse {
   processedCount: number;
   skippedCount: number;
@@ -520,6 +538,7 @@ interface CodexQueueProcessResponse {
   undo: UndoStateSummary;
   inbox: CodexInboxSummary;
   revision: RevisionPlanSummary;
+  dispatch?: CodexBridgeDispatchResult | null;
 }
 
 interface CodexQueueResult {
@@ -562,6 +581,7 @@ interface UploadReferenceResponse {
   uploads: UploadRegistrySummary;
   intent?: UploadIntentRecord;
   bridgeEvent?: CodexBridgeEvent;
+  dispatch?: CodexBridgeDispatchResult;
 }
 
 interface UploadRegistrySummary {
@@ -668,7 +688,7 @@ const previewDescriptors: Record<PreviewState, PreviewDescriptor> = {
 };
 
 const lockedExportRoot = "/Users/bruce/Desktop/PPT";
-const defaultProjectName = "测试-v1.6.11.1";
+const defaultProjectName = "测试-v1.6.11.2";
 const codexInboxPath = "/Users/bruce/Documents/PPT/pptx-workbench/events/codex-inbox.jsonl";
 const revisionPlanPath = "/Users/bruce/Documents/PPT/pptx-workbench/outputs/revision-plan.yaml";
 const playbackQaLogPath = "/Users/bruce/Documents/PPT/pptx-workbench/outputs/playback-qa-log.jsonl";
@@ -752,7 +772,7 @@ app.innerHTML = `
         </div>
         <div class="toolbar-center">
           <button id="edit-project-name" class="project-name-button" type="button" title="修改项目名">
-            <b id="project-name-label">测试-v1.6.11.1</b>
+            <b id="project-name-label">测试-v1.6.11.2</b>
           </button>
           <span aria-hidden="true">·</span>
           <span id="top-slide-position">当前页：1 / 1</span>
@@ -1411,7 +1431,9 @@ async function uploadReferenceFiles(files: File[]): Promise<void> {
       statusEl.textContent = "等待用途确认";
       selectedTab = "codex";
       inspectorCollapsed = false;
-      const uploadNote = response.note ?? "已上传，等待 Codex 在当前对话中确认用途。";
+      const uploadNote = response.dispatch?.status === "waiting_codex"
+        ? "已上传，并已发送到当前 Codex 对话确认用途。"
+        : response.note ?? "已上传，等待 Codex 在当前对话中确认用途。";
       addQaLog(
         "system",
         "上传已记录",
@@ -1509,8 +1531,17 @@ async function processCodexQueue(): Promise<void> {
   }
   const message = latest?.reason ?? "未产生可应用的 deck-spec 修改。";
   const needsCodex = latest?.status === "needs-codex" || latest?.status === "needs-design";
-  showToast(needsCodex ? "需要 Codex 处理" : "处理失败", message, latest?.status === "failed");
-  addQaLog("user-comment", needsCodex ? "需要 Codex 处理" : "自动处理失败", latest?.status === "failed" ? "错误" : "提示", message, latest);
+  const dispatchText = result.dispatch?.status === "waiting_codex"
+    ? "已发送到当前 Codex 对话。"
+    : result.dispatch?.message;
+  showToast(needsCodex ? "需要 Codex 处理" : "处理失败", dispatchText ? `${message} ${dispatchText}` : message, latest?.status === "failed");
+  addQaLog(
+    "user-comment",
+    needsCodex ? "需要 Codex 处理" : "自动处理失败",
+    latest?.status === "failed" ? "错误" : "提示",
+    dispatchText ? `${message} · ${dispatchText}` : message,
+    { latest, dispatch: result.dispatch },
+  );
 }
 
 async function generateRevisionPlanFromAudit(): Promise<void> {
@@ -3065,7 +3096,7 @@ function generateCodexPrompt(slide: SlideView): string {
     "5. 导出到锁定目录 /Users/bruce/Desktop/PPT",
     "6. 最终报告哪些 actions 已处理、哪些跳过、跳过原因",
     "",
-    "注意：v1.6.11.1 只记录结构化批注和生成提示词，不自动执行这些步骤。",
+    "注意：v1.6.11.2 只记录结构化批注和生成提示词，不自动执行这些步骤。",
   ].join("\n");
 }
 

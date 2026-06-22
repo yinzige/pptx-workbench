@@ -67,7 +67,7 @@ interface RpcResponse {
 const clientInfo = {
   name: "pptx_workbench",
   title: "PPTX Workbench",
-  version: "1.6.11.1",
+  version: "1.6.11.2",
 };
 
 export function collectCodexAppServerEnv(): Record<string, string> {

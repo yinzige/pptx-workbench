@@ -4,7 +4,7 @@ import type { GenerationResult } from "./deckTypes.js";
 import { resolveFromProject } from "./paths.js";
 
 export const exportRootDir = "/Users/bruce/Desktop/PPT";
-export const defaultProjectName = "测试-v1.6.11.1";
+export const defaultProjectName = "测试-v1.6.11.2";
 export const exportHistoryPath = resolveFromProject("outputs", "export-history.jsonl");
 
 export interface ExportRequest {

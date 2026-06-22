@@ -3,6 +3,7 @@ import YAML from "yaml";
 import type { CodexInboxEvent, CodexInboxStatus } from "./codexInbox.js";
 import { readCodexInbox, updateCodexInboxEventStatus } from "./codexInbox.js";
 import type { DeckSpec, ElementSpec, LayerSpec, SlideSpec, TextElementSpec } from "./deckTypes.js";
+import { appendCodexBridgeReceipt, updateCodexBridgeEventForInbox } from "./codexBridge.js";
 import { createUndoSnapshot, readUndoState, type UndoStateSummary } from "./undoManager.js";
 import { markMatchingRevisionActionStatus, readRevisionPlan, type RevisionPlanSummary } from "./revisionPlan.js";
 import { defaultSpecPath, loadDeckSpec } from "./specLoader.js";
@@ -62,6 +63,27 @@ export async function processCodexQueue(limit = 1): Promise<CodexQueueProcessRes
     const edit = applyDeterministicEdit(spec, event);
     if (!edit.ok) {
       await updateCodexInboxEventStatus(event.id, edit.status);
+      if (edit.status === "failed") {
+        await updateCodexBridgeEventForInbox(event.id, "failed", {
+          error: edit.reason,
+          payload: {
+            inboxEventId: event.id,
+            finalStatus: "failed",
+            reason: edit.reason,
+          },
+        });
+      }
+      await appendCodexBridgeReceipt({
+        kind: "annotation",
+        status: edit.status,
+        eventId: event.id,
+        message: edit.reason,
+        payload: {
+          slideId: event.selectedSlideId,
+          objectId: event.selectedObjectId,
+          instruction: event.userInstruction,
+        },
+      });
       await markMatchingRevisionActionStatus({
         slideId: event.selectedSlideId,
         objectId: event.selectedObjectId,
@@ -82,6 +104,15 @@ export async function processCodexQueue(limit = 1): Promise<CodexQueueProcessRes
     const afterSpec = YAML.stringify(spec);
     if (afterSpec === beforeSpec) {
       await updateCodexInboxEventStatus(event.id, "failed");
+      await updateCodexBridgeEventForInbox(event.id, "failed", {
+        error: "处理后 deck-spec 没有产生 diff，拒绝标记为已处理。",
+      });
+      await appendCodexBridgeReceipt({
+        kind: "annotation",
+        status: "failed",
+        eventId: event.id,
+        message: "处理后 deck-spec 没有产生 diff，拒绝标记为已处理。",
+      });
       await markMatchingRevisionActionStatus({
         slideId: event.selectedSlideId,
         objectId: event.selectedObjectId,
@@ -112,6 +143,15 @@ export async function processCodexQueue(limit = 1): Promise<CodexQueueProcessRes
       await fs.writeFile(defaultSpecPath, beforeSpec, "utf8");
       spec = await loadDeckSpec(defaultSpecPath);
       await updateCodexInboxEventStatus(event.id, "failed");
+      await updateCodexBridgeEventForInbox(event.id, "failed", {
+        error: verification.reason,
+      });
+      await appendCodexBridgeReceipt({
+        kind: "annotation",
+        status: "failed",
+        eventId: event.id,
+        message: verification.reason,
+      });
       await markMatchingRevisionActionStatus({
         slideId: event.selectedSlideId,
         objectId: event.selectedObjectId,
@@ -130,6 +170,33 @@ export async function processCodexQueue(limit = 1): Promise<CodexQueueProcessRes
     }
 
     await updateCodexInboxEventStatus(event.id, "applied");
+    await updateCodexBridgeEventForInbox(event.id, "applied", {
+      payload: {
+        inboxEventId: event.id,
+        finalStatus: "applied",
+        processedBy: "deterministic-patch",
+        diff: {
+          file: defaultSpecPath,
+          slideId: event.selectedSlideId,
+          objectId: edit.affectedObjectId,
+          before: edit.before,
+          after: edit.after,
+        },
+      },
+    });
+    await appendCodexBridgeReceipt({
+      kind: "annotation",
+      status: "applied",
+      eventId: event.id,
+      message: "确定性批注已真实修改 deck-spec。",
+      payload: {
+        slideId: event.selectedSlideId,
+        objectId: edit.affectedObjectId,
+        instruction: event.userInstruction,
+        before: edit.before,
+        after: edit.after,
+      },
+    });
     await markMatchingRevisionActionStatus({
       slideId: event.selectedSlideId,
       objectId: event.selectedObjectId,

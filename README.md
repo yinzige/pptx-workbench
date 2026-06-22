@@ -19,7 +19,7 @@ The workflow keeps the editable information layer in PPTX, while using a web coc
 
 ## Current Version
 
-`v1.6.11.1`
+`v1.6.11.2`
 
 Highlights:
 
@@ -29,6 +29,8 @@ Highlights:
 - Deterministic local edits for safe small changes such as punctuation removal, text replacement, object deletion, hiding, moving, and resizing.
 - Codex Bridge with current-thread registration, one-time URL tokens, event queue, and JSON-RPC app-server probing.
 - Real Codex app-server probing over `stdio` using `thread/resume` and `turn/start`.
+- Real business-loop dispatch: uploads and open-ended annotations automatically try to enter the active Codex thread through the shared bridge dispatcher.
+- Bridge receipts in `outputs/codex-bridge-receipts.jsonl` for annotation, upload, export, playback, and dispatch status.
 - Dual PPTX output:
   - `PowerPoint-rich.pptx`
   - `WPS-compatible.pptx`
@@ -116,9 +118,17 @@ Send queued Workbench events:
 npm run codex-bridge
 ```
 
+In v1.6.11.2 the browser server also uses the same dispatch path:
+
+- upload events are recorded and immediately dispatched when the real bridge is available
+- deterministic annotations are applied locally and marked `applied` only after a real deck-spec diff
+- open-ended annotations stay out of fake local edits and are dispatched to the active Codex thread
+- dispatch receipts are written to `outputs/codex-bridge-receipts.jsonl`
+
 Bridge state and event files are local runtime artifacts and are intentionally ignored by git:
 
 - `.codex-bridge/`
+- `.codex-bridge/current-thread.json`
 - `events/`
 - `outputs/`
 

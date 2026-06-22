@@ -667,10 +667,10 @@ function buildPreviewParity(spec: DeckSpec): string {
   const lines = [
     "# Preview Parity Checklist",
     "",
-    `Version: v1.6.11.1`,
+    `Version: v1.6.11.2`,
     `Deck: ${spec.title}`,
     "",
-    "v1.6.11.1 的 Web preview 不解析导出的 PPTX，而是与 `renderDeck.ts` 使用同一个 deck-spec 语义：按 layer order 遍历 `slide.layers[].elements[]`，将 13.333 x 7.5 坐标映射到 16:9 Web 容器。",
+    "v1.6.11.2 的 Web preview 不解析导出的 PPTX，而是与 `renderDeck.ts` 使用同一个 deck-spec 语义：按 layer order 遍历 `slide.layers[].elements[]`，将 13.333 x 7.5 坐标映射到 16:9 Web 容器。",
     "",
     "## Renderer contract",
     "",

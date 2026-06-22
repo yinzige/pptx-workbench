@@ -65,6 +65,7 @@ export interface CodexBridgeEvent {
 export interface CodexBridgeSummary {
   configPath: string;
   eventsPath: string;
+  receiptsPath: string;
   pendingTokensPath: string;
   connected: boolean;
   status: CodexBridgeConfigStatus | "not_configured" | "token_invalid" | "token_expired";
@@ -97,6 +98,7 @@ export const codexBridgeDir = resolveFromProject(".codex-bridge");
 export const codexBridgeConfigPath = resolveFromProject(".codex-bridge", "current-thread.json");
 export const codexBridgePendingTokensPath = resolveFromProject(".codex-bridge", "pending-tokens.jsonl");
 export const codexBridgeEventsPath = resolveFromProject("events", "codex-events.jsonl");
+export const codexBridgeReceiptsPath = resolveFromProject("outputs", "codex-bridge-receipts.jsonl");
 export const defaultBridgeTtlMs = 24 * 60 * 60 * 1000;
 export const bridgeTokenTtlMs = 10 * 60 * 1000;
 
@@ -160,6 +162,7 @@ export async function readCodexBridgeSummary(): Promise<CodexBridgeSummary> {
   return {
     configPath: codexBridgeConfigPath,
     eventsPath: codexBridgeEventsPath,
+    receiptsPath: codexBridgeReceiptsPath,
     pendingTokensPath: codexBridgePendingTokensPath,
     connected,
     status: config?.status ?? "not_configured",
@@ -232,6 +235,7 @@ export async function updateCodexBridgeEventStatus(
     updated = {
       ...event,
       ...patch,
+      ...(patch.payload ? { payload: { ...event.payload, ...patch.payload } } : {}),
       status,
       updatedAt,
     };
@@ -239,6 +243,37 @@ export async function updateCodexBridgeEventStatus(
   });
   await fs.writeFile(codexBridgeEventsPath, next.map((event) => JSON.stringify(event)).join("\n") + (next.length > 0 ? "\n" : ""), "utf8");
   return updated;
+}
+
+export async function updateCodexBridgeEventForInbox(
+  inboxEventId: string,
+  status: CodexBridgeEventStatus,
+  patch: Partial<Pick<CodexBridgeEvent, "error" | "payload" | "taskText" | "targetThreadId" | "sentAt" | "attemptCount">> = {},
+): Promise<CodexBridgeEvent | null> {
+  const events = await readCodexBridgeEvents();
+  const match = [...events]
+    .reverse()
+    .find((event) => event.type === "annotation_submitted" && event.payload.inboxEventId === inboxEventId);
+  if (!match) {
+    return null;
+  }
+  return updateCodexBridgeEventStatus(match.id, status, patch);
+}
+
+export async function appendCodexBridgeReceipt(input: {
+  kind: "annotation" | "upload" | "dispatch" | "export" | "playback";
+  status: string;
+  eventId?: string;
+  bridgeEventId?: string;
+  message: string;
+  payload?: Record<string, unknown>;
+}): Promise<void> {
+  await fs.mkdir(path.dirname(codexBridgeReceiptsPath), { recursive: true });
+  const receipt = {
+    time: new Date().toISOString(),
+    ...input,
+  };
+  await fs.appendFile(codexBridgeReceiptsPath, `${JSON.stringify(receipt)}\n`, "utf8");
 }
 
 export async function writeCodexBridgeConfig(input: {
@@ -357,7 +392,7 @@ export function detectAppServer(): CodexBridgeAppServer {
     transport: "none",
     endpoint: endpoint ?? null,
     reason: endpoint
-      ? "已发现 endpoint 环境变量，但 v1.6.11.1 不把普通 HTTP endpoint 当作真实 app-server；请运行 JSON-RPC 探测。"
+      ? "已发现 endpoint 环境变量，但 v1.6.11.2 不把普通 HTTP endpoint 当作真实 app-server；请运行 JSON-RPC 探测。"
       : "未发现真实 Codex app-server transport；当前只注册 threadId，事件会入队，不标记 sent。",
   };
 }

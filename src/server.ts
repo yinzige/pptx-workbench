@@ -1,7 +1,8 @@
 import { createServer as createHttpServer } from "node:http";
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import { annotationTaskText, appendCodexBridgeEvent, codexBridgeConfigPath, codexBridgeEventsPath, codexBridgePendingTokensPath, consumeCodexBridgeToken, ensureCodexBridgeFiles, readCodexBridgeSummary, uploadTaskText } from "./lib/codexBridge.js";
+import { annotationTaskText, appendCodexBridgeEvent, appendCodexBridgeReceipt, codexBridgeConfigPath, codexBridgeEventsPath, codexBridgePendingTokensPath, codexBridgeReceiptsPath, consumeCodexBridgeToken, ensureCodexBridgeFiles, readCodexBridgeSummary, uploadTaskText } from "./lib/codexBridge.js";
+import { dispatchCodexBridgeQueue } from "./lib/codexBridgeDispatcher.js";
 import { appendCodexInboxEvent, codexInboxPath, deleteCodexInboxEvent, ensureCodexInboxFile, readCodexInbox } from "./lib/codexInbox.js";
 import { processCodexQueue } from "./lib/codexQueue.js";
 import { auditPptxBuffer, auditPptxFile, type PptxAuditReport } from "./lib/pptxAudit.js";
@@ -60,7 +61,12 @@ app.post("/api/export", async (req, res, next) => {
         exportDir: exported.exportDir,
         files: exported.files,
       },
-      status: "sent",
+    });
+    await appendCodexBridgeReceipt({
+      kind: "export",
+      status: "queued",
+      message: "导出完成事件已进入 bridge 队列。",
+      payload: { exportDir: exported.exportDir, files: exported.files },
     });
     res.json(exported);
   } catch (error) {
@@ -137,13 +143,22 @@ app.post(
         },
         taskText: uploadTaskText({ fileName, fileSize: req.body.byteLength, uploadMode: mode }),
       });
+      const dispatch = await dispatchCodexBridgeQueue({ limit: 1, eventIds: [bridgeEvent.id] });
+      await appendCodexBridgeReceipt({
+        kind: "upload",
+        status: dispatch.status,
+        bridgeEventId: bridgeEvent.id,
+        message: dispatch.message,
+        payload: { fileName, fileSize: req.body.byteLength, dispatch },
+      });
       res.json({
         mode,
         status: "waiting-purpose",
-        note: bridgeUploadNote(bridgeEvent.status, bridgeEvent.error),
+        note: bridgeUploadNote(dispatch.status === "waiting_codex" ? "waiting_codex" : bridgeEvent.status, bridgeEvent.error),
         uploads,
         intent,
         bridgeEvent,
+        dispatch,
       });
     } catch (error) {
       next(error);
@@ -180,13 +195,22 @@ app.post("/api/upload-reference/metadata", async (req, res, next) => {
       },
       taskText: uploadTaskText({ fileName, fileSize, uploadMode: mode }),
     });
+    const dispatch = await dispatchCodexBridgeQueue({ limit: 1, eventIds: [bridgeEvent.id] });
+    await appendCodexBridgeReceipt({
+      kind: "upload",
+      status: dispatch.status,
+      bridgeEventId: bridgeEvent.id,
+      message: dispatch.message,
+      payload: { fileName, fileSize, dispatch },
+    });
     res.json({
       mode,
       status: "waiting-purpose",
-      note: bridgeUploadNote(bridgeEvent.status, bridgeEvent.error),
+      note: bridgeUploadNote(dispatch.status === "waiting_codex" ? "waiting_codex" : bridgeEvent.status, bridgeEvent.error),
       uploads,
       intent,
       bridgeEvent,
+      dispatch,
     });
   } catch (error) {
     next(error);
@@ -259,6 +283,23 @@ app.get("/api/codex-bridge", async (_req, res, next) => {
   }
 });
 
+app.post("/api/codex-bridge/dispatch", async (req, res, next) => {
+  try {
+    const input = isObjectRecord(req.body) ? req.body : {};
+    const limit = typeof input.limit === "number" ? input.limit : 5;
+    const dispatch = await dispatchCodexBridgeQueue({ limit });
+    await appendCodexBridgeReceipt({
+      kind: "dispatch",
+      status: dispatch.status,
+      message: dispatch.message,
+      payload: { processed: dispatch.processed, failed: dispatch.failed, queued: dispatch.queued },
+    });
+    res.json(dispatch);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/codex-bridge/connect-token", async (req, res, next) => {
   try {
     const input = isObjectRecord(req.body) ? req.body : {};
@@ -290,6 +331,7 @@ app.post("/api/codex-inbox", async (req, res, next) => {
     }
     const foundElement = findElementText(spec, latestEvent.selectedSlideId, latestEvent.selectedObjectId);
     const bridgePayload = {
+      inboxEventId: latestEvent.id,
       slideId: latestEvent.selectedSlideId,
       objectId: latestEvent.selectedObjectId,
       region: {
@@ -353,7 +395,20 @@ app.delete("/api/codex-inbox/:id", async (req, res, next) => {
 app.post("/api/codex-queue/process", async (req, res, next) => {
   try {
     const limit = isObjectRecord(req.body) && typeof req.body.limit === "number" ? req.body.limit : 1;
-    res.json(await processCodexQueue(limit));
+    const result = await processCodexQueue(limit);
+    const dispatch = result.status === "needs-codex" && result.latestProcessed?.eventId
+      ? await dispatchCodexBridgeQueue({ limit: 1, inboxEventId: result.latestProcessed.eventId })
+      : null;
+    if (dispatch) {
+      await appendCodexBridgeReceipt({
+        kind: "dispatch",
+        status: dispatch.status,
+        eventId: result.latestProcessed?.eventId,
+        message: `开放式批注已尝试发送到当前 Codex 对话：${dispatch.message}`,
+        payload: { dispatch },
+      });
+    }
+    res.json({ ...result, dispatch });
   } catch (error) {
     next(error);
   }
@@ -373,7 +428,6 @@ app.post("/api/undo", async (_req, res, next) => {
     await appendCodexBridgeEvent({
       type: "undo_completed",
       payload: { undoCount: undo.undoCount, redoCount: undo.redoCount, latestUndo: undo.latestUndo },
-      status: "sent",
     });
     res.json(undo);
   } catch (error) {
@@ -387,7 +441,6 @@ app.post("/api/redo", async (_req, res, next) => {
     await appendCodexBridgeEvent({
       type: "redo_completed",
       payload: { undoCount: redo.undoCount, redoCount: redo.redoCount, latestUndo: redo.latestUndo },
-      status: "sent",
     });
     res.json(redo);
   } catch (error) {
@@ -413,7 +466,12 @@ app.post("/api/playback-qa/session", async (req, res, next) => {
         sessionCount: summary.sessionCount,
         riskStats: summary.riskStats,
       },
-      status: "sent",
+    });
+    await appendCodexBridgeReceipt({
+      kind: "playback",
+      status: "queued",
+      message: "播放 QA 已记录并进入 bridge 队列。",
+      payload: { latestSession: summary.latestSession?.sessionId },
     });
     res.json(summary);
   } catch (error) {
@@ -459,6 +517,7 @@ app.get("/api/workbench-state", async (_req, res, next) => {
         codexBridgeEvents: codexBridgeEventsPath,
         codexBridgeConfig: codexBridgeConfigPath,
         codexBridgePendingTokens: codexBridgePendingTokensPath,
+        codexBridgeReceipts: codexBridgeReceiptsPath,
         nativeAnimationCatalog: resolveFromProject("specs", "native-animation-catalog.yaml"),
         referenceStyle: resolveFromProject("specs", "reference-style.yaml"),
       },

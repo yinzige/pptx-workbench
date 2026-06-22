@@ -1,5 +1,5 @@
 version: "1"
-title: PPTX Workbench v1.6.11.1 同源预览验收工作台样例
+title: PPTX Workbench v1.6.11.2 同源预览验收工作台样例
 description: Codex-native 本地 PPTX 验收工作台中文多页样例：deck-spec 控制页面、图层、scene beat、Rich
   单击动画簇、WPS 状态页降级、同源真实预览、内置播放 QA、动画时间轴、锁定导出、审计改稿建议、revision-plan.yaml 与 Codex
   改稿提示词。
@@ -90,7 +90,7 @@ slides:
         elements:
           - id: cover-eyebrow
             kind: text
-            text: 本地 PPTX WORKBENCH · V1.6.11.1
+            text: 本地 PPTX WORKBENCH · V1.6.11.2
             x: 0.9
             y: 0.72
             w: 5.8
@@ -684,7 +684,7 @@ slides:
             fit: shrink
           - id: closing-footer
             kind: text
-            text: v1.6.11.1 保留每页一次点击的 scene beat，并修复 Web 预览与 PPTX 导出的同源一致性。
+            text: v1.6.11.2 保留每页一次点击的 scene beat，并修复 Web 预览与 PPTX 导出的同源一致性。
             x: 0.95
             y: 6.18
             w: 7.8

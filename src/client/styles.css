@@ -4283,7 +4283,7 @@ pre,
 }
 
 
-/* v1.6.11.1 Codex-style same-source preview: deck-spec element renderer, compact actions, readable timeline */
+/* v1.6.11.2 Codex-style same-source preview: deck-spec element renderer, compact actions, readable timeline */
 :root {
   --codex-bg: #f6f7f9;
   --codex-surface: #ffffff;
@@ -5090,7 +5090,7 @@ dl.compact dd,
   }
 }
 
-/* v1.6.11.1 production acceptance layout: fit-to-available-area, anchored popovers, final-state thumbnails */
+/* v1.6.11.2 production acceptance layout: fit-to-available-area, anchored popovers, final-state thumbnails */
 .app-shell {
   grid-template-rows: auto minmax(0, 1fr) 32px;
 }
@@ -5333,7 +5333,7 @@ dl.compact dd,
   }
 }
 
-/* v1.6.11.1 Codex-native PPTX production foundation */
+/* v1.6.11.2 Codex-native PPTX production foundation */
 .sr-only {
   position: absolute !important;
   width: 1px !important;
@@ -6434,7 +6434,7 @@ dl.compact dd,
   color: var(--text-primary);
 }
 
-/* v1.6.11.1 dark readability: left thumbnails */
+/* v1.6.11.2 dark readability: left thumbnails */
 .app-shell[data-theme-mode="dark"] .slide-nav {
   color: #f4f4f5;
 }
@@ -6584,7 +6584,7 @@ dl.compact dd,
   transform-origin: 50% 50%;
 }
 
-/* v1.6.11.1 Codex Bridge status: simple, honest connection state. */
+/* v1.6.11.2 Codex Bridge status: simple, honest connection state. */
 .codex-bridge-status {
   display: inline-flex;
   align-items: center;
