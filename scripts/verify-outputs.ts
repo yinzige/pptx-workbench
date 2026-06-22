@@ -310,6 +310,8 @@ assertContains(serverSource, "/api/codex-bridge/dispatch", "v1.6.11.2 Codex brid
 assertContains(serverSource, "appendCodexBridgeEvent", "v1.6.11.2 unified bridge event writer");
 assertContains(serverSource, "appendCodexBridgeReceipt", "v1.6.11.2 bridge receipt writer");
 assertContains(serverSource, "dispatchCodexBridgeQueue", "v1.6.11.2 bridge dispatch from upload and open-ended annotations");
+assertContains(serverSource, "autoRegisterCurrentThreadFromEnvironment", "v1.6.11.2 server startup binds current Codex thread");
+assertContains(serverSource, "server-env-current-thread", "v1.6.11.2 server env bridge source");
 assertContains(serverSource, "codexBridge,", "v1.6.11.2 workbench state Codex bridge summary");
 assertContains(serverSource, "appendCodexInboxEvent", "Codex inbox append route");
 assertContains(serverSource, "codexInbox:", "workbench state Codex inbox summary");

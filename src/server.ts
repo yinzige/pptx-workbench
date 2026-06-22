@@ -1,7 +1,7 @@
 import { createServer as createHttpServer } from "node:http";
 import express from "express";
 import { createServer as createViteServer } from "vite";
-import { annotationTaskText, appendCodexBridgeEvent, appendCodexBridgeReceipt, codexBridgeConfigPath, codexBridgeEventsPath, codexBridgePendingTokensPath, codexBridgeReceiptsPath, consumeCodexBridgeToken, ensureCodexBridgeFiles, readCodexBridgeSummary, uploadTaskText } from "./lib/codexBridge.js";
+import { annotationTaskText, appendCodexBridgeEvent, appendCodexBridgeReceipt, codexBridgeConfigPath, codexBridgeEventsPath, codexBridgePendingTokensPath, codexBridgeReceiptsPath, consumeCodexBridgeToken, ensureCodexBridgeFiles, readCodexBridgeConfig, readCodexBridgeSummary, uploadTaskText, writeCodexBridgeConfig } from "./lib/codexBridge.js";
 import { dispatchCodexBridgeQueue } from "./lib/codexBridgeDispatcher.js";
 import { appendCodexInboxEvent, codexInboxPath, deleteCodexInboxEvent, ensureCodexInboxFile, readCodexInbox } from "./lib/codexInbox.js";
 import { processCodexQueue } from "./lib/codexQueue.js";
@@ -25,6 +25,7 @@ let lastUploadedAudit: PptxAuditReport | null = null;
 const designSystemPath = resolveFromProject("specs", "presentation-design-system.yaml");
 await ensureCodexInboxFile();
 await ensureCodexBridgeFiles();
+await autoRegisterCurrentThreadFromEnvironment();
 
 app.get("/api/spec", async (_req, res, next) => {
   try {
@@ -644,6 +645,30 @@ function bridgeUploadNote(status: string, error: string | undefined): string {
     return "已上传，已注册会话但未发现 app-server；等待 Codex 对话读取。";
   }
   return "已上传，等待 Codex 在当前对话中确认用途。";
+}
+
+async function autoRegisterCurrentThreadFromEnvironment(): Promise<void> {
+  const threadId = currentThreadIdFromEnvironment();
+  if (!threadId) {
+    return;
+  }
+  const current = await readCodexBridgeConfig();
+  if (current?.status === "connected" && current.threadId === threadId) {
+    return;
+  }
+  await writeCodexBridgeConfig({
+    threadId,
+    source: "server-env-current-thread",
+  });
+  console.log(`pptx-workbench bridge registered current Codex thread ${threadId}`);
+}
+
+function currentThreadIdFromEnvironment(): string | undefined {
+  return [
+    process.env.CODEX_THREAD_ID,
+    process.env.CODEX_CURRENT_THREAD_ID,
+    process.env.OPENAI_CODEX_THREAD_ID,
+  ].map((value) => value?.trim()).find(Boolean);
 }
 
 function findElementText(
